@@ -1,0 +1,14 @@
+﻿@{
+    var route = TempData["prevRoute"];
+    ViewData["Title"] = route;
+}
+
+@section task{
+    <div class="text-center">
+        <h1 class="display-4">@route</h1>
+        <form method="post" asp-controller="List" asp-action="DeleteList">
+            <input type="hidden" name="listName" value="@route" />
+            <button style="width:fit-content; height:fit-content; font-size: small; background-color: black;" type="submit" class="btn btn-link">(Delete)</button>
+        </form>
+    </div>
+}

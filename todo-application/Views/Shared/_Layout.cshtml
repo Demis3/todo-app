@@ -1,0 +1,267 @@
+﻿@{
+    @using ToDoListLibrary.Models;
+    var context = new ToDoListLibrary.Data.ApplicationContext();
+    var todoListRepository = new ToDoListLibrary.Repositories.ToDoListRepository(context);
+    var _lists = todoListRepository.GetAll(null);
+    var curName = TempData["prevRoute"].ToString();
+
+    var titles = new string[] { "Today", "Important", "Plans", "Personal" };
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - todo_application</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+    <style>
+        html, body {
+            font-family: "Lato", sans-serif;
+            background-color: black;
+            color: white;
+        }
+
+        li a {
+            color: white;
+        }
+
+        .btn, .in {
+            border-radius: 0;
+            color: white;
+        }
+
+        .btn {
+            background-color: #5a5a5a99;
+            border: none;
+        }
+
+        .sidenav {
+            height: 100%;
+            width: 275px;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #111;
+            overflow-x: hidden;
+            padding-top: 25px;
+        }
+
+        .nav-item:not(.nav-line):hover {
+            background-color: #3c3c3c99;
+        }
+
+        .main {
+            margin-left: 275px;
+            padding: 0px 10px;
+            background-color: black;
+            color: white;
+        }
+
+        @@media screen and (max-height: 450px) {
+            .sidenav {
+                padding-top: 15px;
+                width: 225px;
+            }
+
+            .main {
+                margin-left: 225px;
+            }
+
+            .sidenav a {
+                font-size: 75%;
+            }
+        }
+    </style>
+
+    <script>
+        function openEditModal(event, taskId) {
+            event.preventDefault();
+            document.getElementById("editModal" + taskId).style.display = "block";
+            document.getElementById("actionModal" + taskId).style.display = "none";
+
+            document.getElementById("editTitleModal" + taskId).style.display = "block";
+            document.getElementById("actionTitleModal" + taskId).style.display = "none";
+            document.getElementById("editDescModal" + taskId).style.display = "block";
+            document.getElementById("actionDescModal" + taskId).style.display = "none";
+            document.getElementById("editDateModal" + taskId).style.display = "block";
+            document.getElementById("actionDateModal" + taskId).style.display = "none";
+        }
+
+        function closeEditModal(taskId) {
+            document.getElementById("editModal" + taskId).style.display = "none";
+            document.getElementById("actionModal" + taskId).style.display = "block";
+
+            document.getElementById("editTitleModal" + taskId).style.display = "none";
+            document.getElementById("actionTitleModal" + taskId).style.display = "block";
+            document.getElementById("editDescModal" + taskId).style.display = "none";
+            document.getElementById("actionDescModal" + taskId).style.display = "block";
+            document.getElementById("editDateModal" + taskId).style.display = "none";
+            document.getElementById("actionDateModal" + taskId).style.display = "block";
+        }
+
+        function confirmEdit() {
+            closeEditModal();
+        }
+    </script>
+
+    <div class="sidenav border-right border-secondary">
+        <ul class="nav flex-column" style="padding: 0px, 10px, 0px, 10px;">
+            @foreach (var title in titles)
+            {
+                if (title == curName)
+                {
+                    <li class="nav-item py-1" style="background-color: deepskyblue">
+                        <a class="nav-link" href="@title">O @title</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item py-1">
+                        <a class="nav-link" href="@title">O @title</a>
+                    </li>
+                }
+            }
+            <li class="nav-item mt-2 mb-2 nav-line">
+                <hr class="border-secondary">
+            </li>
+            <li class="nav-item py-1 nav-line">
+                <form asp-controller="List" asp-action="CreateList" method="post">
+                    <div class="form-group d-flex">
+                        <button type="submit" class="btn btn-primary">O</button>
+                        <input type="text" class="in form-control" name="listName" placeholder="New list">
+                    </div>
+                </form>
+            </li>
+            @foreach (var list in _lists)
+            {
+                if (list.Name == curName)
+                {
+                    <li class="nav-item py-1" style="background-color: deepskyblue">
+                        <a class="nav-link" asp-controller="Home" asp-action="AddedList" asp-route-listName="@list.Name">O @list.Name</a>
+                    </li>
+                }
+                else
+                {
+                    <li class="nav-item py-1">
+                        <a class="nav-link" asp-controller="Home" asp-action="AddedList" asp-route-listName="@list.Name">O @list.Name</a>
+                    </li>
+                }
+            }
+        </ul>
+    </div>
+
+    <div class="main">
+        <div style="text-align: center">
+            <div style="">
+                <div style="margin-top: 10px; margin-bottom: 10px">
+                    @RenderSection("task", false)
+                </div>
+                <form asp-controller="Task" asp-action="CreateTask" method="post">
+                    <div class="form-group d-flex" style="margin: auto; margin-bottom: 25px; width: 75%">
+                        <button type="submit" class="btn btn-primary">O</button>
+                        <input style="color:black;" type="text" class="in form-control" name="title" placeholder="New task">
+                        <input style="color:black;" type="text" class="in form-control" name="description" placeholder="Description">
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="container">
+            @if (Model == null || Model.Count == 0)
+            {
+                <p style="text-align:center; margin: auto;">There are no items in the list...</p>
+            }
+            else
+            {
+                <table class="table mb-0">
+
+                    <thead>
+                        <tr style="color: white;">
+                            <th scope="col">Status</th>
+                            <th scope="col">Task</th>
+                            <th scope="col">Description</th>
+                            <th scope="col">Due Date</th>
+                            <th scope="col">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody style="color: white;">
+                        @foreach (ToDoTask task in Model)
+                        {
+                            <form asp-controller="Task" asp-action="Status" method="post">
+
+                                <tr class="fw-normal">
+
+                                    <th>
+                                        <span class="ms-2">
+                                            @if (task.IsCompleted)
+                                            {
+                                                <span style="color: green;">Finished</span>
+                                            }
+                                            else
+                                            {
+                                                <span style="color: red;">Unfinished</span>
+                                            }
+                                        </span>
+                                    </th>
+
+                                    <td class="align-middle" style="max-width: 200px; word-wrap: break-word;">
+                                        <span id="actionTitleModal@(task.Id)" style="display: block">@task.Title</span>
+                                        <input type="text" name="title" value="@task.Title" id="editTitleModal@(task.Id)" style="display: none" />
+                                    </td>
+
+                                    <td class="align-middle" style="max-width: 200px; word-wrap: break-word;">
+                                        <span id="actionDescModal@(task.Id)" style="display: block">@task.Description</span>
+                                        <input type="text" name="description" value="@task.Description" id="editDescModal@(task.Id)" style="display: none" />
+                                    </td>
+
+                                    <td class="align-middle" style="max-width: 200px; word-wrap: break-word;">
+                                        @if (task.DueDate.HasValue)
+                                        {
+                                            <span id="actionDateModal@(task.Id)" style="display: block">@task.DueDate.Value.ToShortDateString()</span>
+                                            <input type="date" name="dueDate" value="@task.DueDate.Value.ToShortDateString()" id="editDateModal@(task.Id)" style="display: none" />
+                                        }
+                                        else
+                                        {
+                                            <span id="actionDateModal@(task.Id)" style="display: block">-</span>
+                                            <input type="date" name="dueDate" value="@DateTime.Now.ToShortDateString()" id="editDateModal@(task.Id)" style="display: none" />
+                                        }
+                                    </td>
+
+                                    <td class="align-middle">
+                                        <input type="hidden" name="id" value="@task.Id" />
+                                        <input type="hidden" name="listName" value="@task.ListName" />
+
+                                        <div id="actionModal@(task.Id)" style="display: block">
+                                            <button type="submit" class="btn" data-mdb-toggle="tooltip" name="submitButton" value="Done">Done</button>
+                                            <button class="btn" data-mdb-toggle="tooltip" value="edit" onclick="openEditModal(event, @task.Id)">Edit</button>
+                                            <button type="submit" class="btn" data-mdb-toggle="tooltip" name="submitButton" value="Remove">Remove</button>
+                                        </div>
+
+                                        <div id="editModal@(task.Id)" style="display: none">
+                                            <input type="submit" class="btn" name="submitButton" value="Confirm" onclick="confirmEdit()" />
+                                            <input type="button" class="btn" data-dismiss="modal" value="Cancel" onclick="closeEditModal(@task.Id)" />
+                                        </div>
+                                    </td>
+
+                                </tr>
+
+                            </form>
+                        }
+                    </tbody>
+                </table>
+            }
+        </div>
+    </div>
+
+    @RenderBody()
+
+</body>
+</html>

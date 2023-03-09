@@ -1,0 +1,13 @@
+﻿@{
+    ViewData["Title"] = "Today";
+
+    var date = DateTime.Now;
+    var formattedDate = $"{date:dddd, MMMM dd}";
+}
+
+@section task{
+    <div class="text-center">
+        <h1 class="display-4">Today</h1>
+        <p>@formattedDate</p>
+    </div>
+}
